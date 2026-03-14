@@ -8,6 +8,9 @@ export type Note = {
   note: string;
 };
 
+/** Use when creating a note; id is assigned by the database. */
+export type NewNote = Omit<Note, 'id'>;
+
 export const migrateDbIfNeeded = async (db: SQLiteDatabase) => {
   const meta = await db.getFirstAsync<{
     user_version: number;
@@ -28,7 +31,7 @@ export const getAllNotes = async (db: SQLiteDatabase): Promise<Note[]> => {
   return await db.getAllAsync<Note>('SELECT * FROM content');
 };
 
-export const addNote = async (db: SQLiteDatabase, note: Note) => {
+export const addNote = async (db: SQLiteDatabase, note: NewNote) => {
   return await db.runAsync('INSERT INTO content (title, note) VALUES (?, ?)', [
     note.title,
     note.note,
