@@ -6,7 +6,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PlusIcon } from 'lucide-react-native';
 
@@ -33,11 +33,18 @@ export default function Screen() {
       <View className="flex-1">
         <ScrollView className="flex-1" contentContainerClassName="p-4 gap-3 pb-2">
           {notes.map((note) => (
-            <Card key={note.id}>
-              <CardHeader>
-                <CardTitle>{note.title}</CardTitle>
-              </CardHeader>
-            </Card>
+            <Pressable
+              key={note.id}
+              onPress={() => router.push(`/note/${note.id}`)}
+              accessibilityRole="button"
+              accessibilityLabel={`Open note: ${note.title}`}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle>{note.title}</CardTitle>
+                </CardHeader>
+              </Card>
+            </Pressable>
           ))}
         </ScrollView>
         <View

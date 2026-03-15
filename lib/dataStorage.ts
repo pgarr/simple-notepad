@@ -31,6 +31,16 @@ export const getAllNotes = async (db: SQLiteDatabase): Promise<Note[]> => {
   return await db.getAllAsync<Note>('SELECT * FROM content');
 };
 
+export const getNoteById = async (
+  db: SQLiteDatabase,
+  id: number
+): Promise<Note | null> => {
+  const row = await db.getFirstAsync<Note>('SELECT * FROM content WHERE id = ?', [
+    id,
+  ]);
+  return row ?? null;
+};
+
 export const addNote = async (db: SQLiteDatabase, note: NewNote) => {
   return await db.runAsync('INSERT INTO content (title, note) VALUES (?, ?)', [
     note.title,
