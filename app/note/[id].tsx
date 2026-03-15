@@ -4,7 +4,7 @@ import { Text } from '@/components/ui/text';
 import { deleteNote, getNoteById, type Note } from '@/lib/dataStorage';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { PencilIcon, Trash2Icon } from 'lucide-react-native';
+import { ArrowLeft, PencilIcon, Trash2Icon } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -79,7 +79,17 @@ export default function NoteViewScreen() {
       <Stack.Screen
         options={{
           title: note.title,
-          headerBackVisible: true,
+          headerBackVisible: false,
+          headerLeft: () => (
+            <Button
+              variant="ghost"
+              size="icon"
+              onPress={() => router.replace('/')}
+              accessibilityLabel="Back to notes"
+            >
+              <Icon as={ArrowLeft} className="size-5" />
+            </Button>
+          ),
           headerRight: () => (
             <View className="flex-row items-center gap-1">
               <Button
