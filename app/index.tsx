@@ -5,15 +5,13 @@ import { getAllNotes } from '@/lib/dataStorage';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
+import { PlusIcon } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { PlusIcon } from 'lucide-react-native';
 
 export default function Screen() {
   const db = useSQLiteContext();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const [notes, setNotes] = useState<Awaited<ReturnType<typeof getAllNotes>>>([]);
 
   const loadNotes = useCallback(async () => {
@@ -29,38 +27,37 @@ export default function Screen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Notes' }} />
-      <View className="flex-1">
-        <ScrollView className="flex-1" contentContainerClassName="p-4 gap-3 pb-2">
-          {notes.map((note) => (
-            <Pressable
-              key={note.id}
-              onPress={() => router.push(`/note/${note.id}`)}
-              accessibilityRole="button"
-              accessibilityLabel={`Open note: ${note.title}`}
+      <Stack.Screen
+        options={{
+          title: 'Notes',
+          headerRight: () => (
+            <Button
+              variant="ghost"
+              size="icon"
+              onPress={() => router.push('/add-note')}
+              accessibilityLabel="Add note"
             >
-              <Card>
-                <CardHeader>
-                  <CardTitle>{note.title}</CardTitle>
-                </CardHeader>
-              </Card>
-            </Pressable>
-          ))}
-        </ScrollView>
-        <View
-          className="border-t border-border bg-background px-4 py-3"
-          style={{ paddingBottom: insets.bottom + 12 }}
-        >
-          <Button
-            onPress={() => router.push('/add-note')}
-            size="icon"
-            className="self-center"
-            accessibilityLabel="Add note"
+              <Icon as={PlusIcon} className="size-6 text-foreground" />
+            </Button>
+          ),
+        }}
+      />
+      <ScrollView className="flex-1" contentContainerClassName="p-4 gap-3 pb-2">
+        {notes.map((note) => (
+          <Pressable
+            key={note.id}
+            onPress={() => router.push(`/note/${note.id}`)}
+            accessibilityRole="button"
+            accessibilityLabel={`Open note: ${note.title}`}
           >
-            <Icon as={PlusIcon} className="size-6" />
-          </Button>
-        </View>
-      </View>
+            <Card>
+              <CardHeader>
+                <CardTitle>{note.title}</CardTitle>
+              </CardHeader>
+            </Card>
+          </Pressable>
+        ))}
+      </ScrollView>
     </>
   );
 }
