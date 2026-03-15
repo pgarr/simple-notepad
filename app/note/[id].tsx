@@ -1,12 +1,21 @@
+import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
-import { getNoteById, type Note } from '@/lib/dataStorage';
+import { deleteNote, getNoteById, type Note } from '@/lib/dataStorage';
 import { useSQLiteContext } from 'expo-sqlite';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { PencilIcon, Trash2Icon } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  View,
+} from 'react-native';
 
 export default function NoteViewScreen() {
   const db = useSQLiteContext();
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [note, setNote] = useState<Note | null | 'loading'>('loading');
 
@@ -23,6 +32,25 @@ export default function NoteViewScreen() {
   useEffect(() => {
     loadNote();
   }, [loadNote]);
+
+  const handleDeletePress = useCallback(() => {
+    if (note === null || note === 'loading') return;
+    Alert.alert(
+      'Delete note',
+      'Are you sure you want to delete this note?',
+      [
+        { text: 'No', style: 'cancel' },
+        {
+          text: 'Yes',
+          style: 'destructive',
+          onPress: async () => {
+            await deleteNote(db, note.id);
+            router.replace('/');
+          },
+        },
+      ]
+    );
+  }, [db, note, router]);
 
   if (note === 'loading') {
     return (
@@ -52,6 +80,26 @@ export default function NoteViewScreen() {
         options={{
           title: note.title,
           headerBackVisible: true,
+          headerRight: () => (
+            <View className="flex-row items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onPress={() => router.push(`/edit-note/${note.id}`)}
+                accessibilityLabel="Edit note"
+              >
+                <Icon as={PencilIcon} className="size-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onPress={handleDeletePress}
+                accessibilityLabel="Delete note"
+              >
+                <Icon as={Trash2Icon} className="size-5" />
+              </Button>
+            </View>
+          ),
         }}
       />
       <ScrollView className="flex-1" contentContainerClassName="p-4">

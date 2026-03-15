@@ -47,3 +47,18 @@ export const addNote = async (db: SQLiteDatabase, note: NewNote) => {
     note.note,
   ]);
 };
+
+export const updateNote = async (
+  db: SQLiteDatabase,
+  id: number,
+  note: NewNote
+) => {
+  return await db.runAsync(
+    'UPDATE content SET title = ?, note = ? WHERE id = ?',
+    [note.title, note.note, id]
+  );
+};
+
+export const deleteNote = async (db: SQLiteDatabase, id: number) => {
+  return await db.runAsync('DELETE FROM content WHERE id = ?', [id]);
+};
