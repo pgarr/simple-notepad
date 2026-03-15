@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,6 +10,7 @@ import {
 } from '@/lib/dataStorage';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { ArrowLeft } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -87,7 +89,22 @@ export default function EditNoteScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Edit note', headerBackVisible: true }} />
+      <Stack.Screen
+        options={{
+          title: 'Edit note',
+          headerBackVisible: false,
+          headerLeft: () => (
+            <Button
+              variant="ghost"
+              size="icon"
+              onPress={() => router.back()}
+              accessibilityLabel="Back"
+            >
+              <Icon as={ArrowLeft} className="size-5" />
+            </Button>
+          ),
+        }}
+      />
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

@@ -30,6 +30,7 @@ export default function Screen() {
       <Stack.Screen
         options={{
           title: 'Notes',
+          headerBackVisible: false,
           headerRight: () => (
             <Button
               variant="ghost"
