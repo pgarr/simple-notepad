@@ -7,11 +7,12 @@ import {
   updateNote,
   type Note,
 } from '@/lib/dataStorage';
+import { useFocusEffect } from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, BackHandler, View } from 'react-native';
 
 export default function EditNoteScreen() {
   const db = useSQLiteContext();
@@ -21,6 +22,7 @@ export default function EditNoteScreen() {
 
   const numId = id != null ? Number(id) : NaN;
   const isValidId = !Number.isNaN(numId);
+  const backTarget = isValidId ? `/note/${id}` : '/';
 
   const loadNote = useCallback(async () => {
     if (!isValidId) {
@@ -42,6 +44,20 @@ export default function EditNoteScreen() {
       router.replace(`/note/${id}`);
     },
     [db, numId, id, isValidId, router]
+  );
+
+  const handleBackToPreviousScreen = useCallback(() => {
+    router.replace(backTarget);
+  }, [backTarget, router]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+        handleBackToPreviousScreen();
+        return true;
+      });
+      return () => subscription.remove();
+    }, [handleBackToPreviousScreen])
   );
 
   if (note === 'loading') {
@@ -76,7 +92,7 @@ export default function EditNoteScreen() {
             <Button
               variant="ghost"
               size="icon"
-              onPress={() => router.back()}
+              onPress={handleBackToPreviousScreen}
               accessibilityLabel="Back"
             >
               <Icon as={ArrowLeft} className="size-5" />
