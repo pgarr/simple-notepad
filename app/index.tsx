@@ -7,7 +7,7 @@ import { Stack, useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { PlusIcon } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { BackHandler, Pressable, ScrollView, View } from 'react-native';
 
 export default function Screen() {
   const db = useSQLiteContext();
@@ -22,6 +22,11 @@ export default function Screen() {
   useFocusEffect(
     useCallback(() => {
       loadNotes();
+      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+        BackHandler.exitApp();
+        return true;
+      });
+      return () => subscription.remove();
     }, [loadNotes])
   );
 

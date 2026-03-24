@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { deleteNote, getNoteById, type Note } from '@/lib/dataStorage';
+import { useFocusEffect } from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, PencilIcon, Trash2Icon } from 'lucide-react-native';
@@ -9,6 +10,7 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  BackHandler,
   ScrollView,
   View,
 } from 'react-native';
@@ -32,6 +34,16 @@ export default function NoteViewScreen() {
   useEffect(() => {
     loadNote();
   }, [loadNote]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+        router.replace('/');
+        return true;
+      });
+      return () => subscription.remove();
+    }, [router])
+  );
 
   const handleDeletePress = useCallback(() => {
     if (note === null || note === 'loading') return;
