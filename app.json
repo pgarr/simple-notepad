@@ -2,7 +2,7 @@
   "expo": {
     "name": "simple-notepad",
     "slug": "simple-notepad",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "simple-notepad",
@@ -44,7 +44,7 @@
         "projectId": "9e3820b7-558b-4bd2-a1b2-e49561e741e6"
       }
     },
-    "runtimeVersion": "1.0.1",
+    "runtimeVersion": "1.0.2",
     "updates": {
       "url": "https://u.expo.dev/9e3820b7-558b-4bd2-a1b2-e49561e741e6"
     }
