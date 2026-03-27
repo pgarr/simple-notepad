@@ -1,0 +1,13 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build_android:
+    name: Build Android App
+    type: build
+    params:
+      platform: android
