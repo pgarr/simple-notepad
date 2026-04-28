@@ -1,13 +1,13 @@
 import { HeaderBackButton } from '@/components/navigation/HeaderBackButton';
 import { NoteForm } from '@/components/NoteForm';
-import { Text } from '@/components/ui/text';
+import { ScreenLoadingState } from '@/components/state/ScreenLoadingState';
+import { ScreenNotFoundState } from '@/components/state/ScreenNotFoundState';
 import { useHardwareBackHandler } from '@/hooks/useHardwareBackHandler';
 import { useParsedNumericRouteParam } from '@/hooks/useParsedNumericRouteParam';
 import { LIST_TYPE, getNoteById, updateNote, type Note } from '@/lib/dataStorage';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
 
 export default function EditNoteScreen() {
   const db = useSQLiteContext();
@@ -51,25 +51,11 @@ export default function EditNoteScreen() {
   useHardwareBackHandler(handleBackToPreviousScreen);
 
   if (note === 'loading') {
-    return (
-      <>
-        <Stack.Screen options={{ title: '…' }} />
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator />
-        </View>
-      </>
-    );
+    return <ScreenLoadingState />;
   }
 
   if (note === null) {
-    return (
-      <>
-        <Stack.Screen options={{ title: 'Edit note' }} />
-        <View className="flex-1 items-center justify-center p-4">
-          <Text className="text-muted-foreground">Note not found.</Text>
-        </View>
-      </>
-    );
+    return <ScreenNotFoundState title="Edit note" message="Note not found." />;
   }
 
   return (

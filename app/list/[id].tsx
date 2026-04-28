@@ -1,4 +1,6 @@
 import { HeaderBackButton } from '@/components/navigation/HeaderBackButton';
+import { ScreenLoadingState } from '@/components/state/ScreenLoadingState';
+import { ScreenNotFoundState } from '@/components/state/ScreenNotFoundState';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { useHardwareBackHandler } from '@/hooks/useHardwareBackHandler';
@@ -14,7 +16,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useRouter } from 'expo-router';
 import { CheckSquare2, Square } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView } from 'react-native';
 
 type ListViewState =
   | 'loading'
@@ -68,25 +70,11 @@ export default function ListViewScreen() {
   );
 
   if (listView === 'loading') {
-    return (
-      <>
-        <Stack.Screen options={{ title: '…' }} />
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator />
-        </View>
-      </>
-    );
+    return <ScreenLoadingState />;
   }
 
   if (listView === null) {
-    return (
-      <>
-        <Stack.Screen options={{ title: 'List' }} />
-        <View className="flex-1 items-center justify-center p-4">
-          <Text className="text-muted-foreground">List not found.</Text>
-        </View>
-      </>
-    );
+    return <ScreenNotFoundState title="List" message="List not found." />;
   }
 
   return (

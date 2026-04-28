@@ -1,4 +1,6 @@
 import { HeaderBackButton } from '@/components/navigation/HeaderBackButton';
+import { ScreenLoadingState } from '@/components/state/ScreenLoadingState';
+import { ScreenNotFoundState } from '@/components/state/ScreenNotFoundState';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
@@ -9,7 +11,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useRouter } from 'expo-router';
 import { PencilIcon, Trash2Icon } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, View } from 'react-native';
+import { Alert, ScrollView, View } from 'react-native';
 
 export default function NoteViewScreen() {
   const db = useSQLiteContext();
@@ -58,25 +60,11 @@ export default function NoteViewScreen() {
   }, [db, note, router]);
 
   if (note === 'loading') {
-    return (
-      <>
-        <Stack.Screen options={{ title: '…' }} />
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator />
-        </View>
-      </>
-    );
+    return <ScreenLoadingState />;
   }
 
   if (note === null) {
-    return (
-      <>
-        <Stack.Screen options={{ title: 'Note' }} />
-        <View className="flex-1 items-center justify-center p-4">
-          <Text className="text-muted-foreground">Note not found.</Text>
-        </View>
-      </>
-    );
+    return <ScreenNotFoundState title="Note" message="Note not found." />;
   }
 
   return (
