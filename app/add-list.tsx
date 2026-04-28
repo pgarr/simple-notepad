@@ -1,12 +1,11 @@
+import { HeaderBackButton } from '@/components/navigation/HeaderBackButton';
 import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { useHardwareBackHandler } from '@/hooks/useHardwareBackHandler';
 import { addList, type ListItem } from '@/lib/dataStorage';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useRouter } from 'expo-router';
-import { ArrowLeft } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 
@@ -53,13 +52,10 @@ export default function AddListScreen() {
           title: 'New list',
           headerBackVisible: false,
           headerLeft: () => (
-            <Button
-              variant="ghost"
-              size="icon"
+            <HeaderBackButton
               onPress={() => router.replace('/')}
-              accessibilityLabel="Back to notes">
-              <Icon as={ArrowLeft} className="size-5" />
-            </Button>
+              accessibilityLabel="Back to notes"
+            />
           ),
         }}
       />

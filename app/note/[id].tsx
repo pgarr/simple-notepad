@@ -1,3 +1,4 @@
+import { HeaderBackButton } from '@/components/navigation/HeaderBackButton';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
@@ -6,7 +7,7 @@ import { useParsedNumericRouteParam } from '@/hooks/useParsedNumericRouteParam';
 import { LIST_TYPE, deleteNote, getNoteById, type Note } from '@/lib/dataStorage';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useRouter } from 'expo-router';
-import { ArrowLeft, PencilIcon, Trash2Icon } from 'lucide-react-native';
+import { PencilIcon, Trash2Icon } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, View } from 'react-native';
 
@@ -85,14 +86,10 @@ export default function NoteViewScreen() {
           title: note.title,
           headerBackVisible: false,
           headerLeft: () => (
-            <Button
-              variant="ghost"
-              size="icon"
+            <HeaderBackButton
               onPress={() => router.replace('/')}
               accessibilityLabel="Back to notes"
-            >
-              <Icon as={ArrowLeft} className="size-5" />
-            </Button>
+            />
           ),
           headerRight: () => (
             <View className="flex-row items-center gap-1">

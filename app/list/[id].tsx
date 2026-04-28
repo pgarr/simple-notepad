@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { HeaderBackButton } from '@/components/navigation/HeaderBackButton';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { useHardwareBackHandler } from '@/hooks/useHardwareBackHandler';
@@ -12,7 +12,7 @@ import {
 } from '@/lib/dataStorage';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useRouter } from 'expo-router';
-import { ArrowLeft, CheckSquare2, Square } from 'lucide-react-native';
+import { CheckSquare2, Square } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 
@@ -96,14 +96,10 @@ export default function ListViewScreen() {
           title: listView.title,
           headerBackVisible: false,
           headerLeft: () => (
-            <Button
-              variant="ghost"
-              size="icon"
+            <HeaderBackButton
               onPress={() => router.replace('/')}
               accessibilityLabel="Back to notes"
-            >
-              <Icon as={ArrowLeft} className="size-5" />
-            </Button>
+            />
           ),
         }}
       />

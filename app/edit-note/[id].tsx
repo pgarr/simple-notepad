@@ -1,5 +1,4 @@
-import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icon';
+import { HeaderBackButton } from '@/components/navigation/HeaderBackButton';
 import { NoteForm } from '@/components/NoteForm';
 import { Text } from '@/components/ui/text';
 import { useHardwareBackHandler } from '@/hooks/useHardwareBackHandler';
@@ -7,7 +6,6 @@ import { useParsedNumericRouteParam } from '@/hooks/useParsedNumericRouteParam';
 import { LIST_TYPE, getNoteById, updateNote, type Note } from '@/lib/dataStorage';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useRouter } from 'expo-router';
-import { ArrowLeft } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
@@ -81,14 +79,10 @@ export default function EditNoteScreen() {
           title: 'Edit note',
           headerBackVisible: false,
           headerLeft: () => (
-            <Button
-              variant="ghost"
-              size="icon"
+            <HeaderBackButton
               onPress={handleBackToPreviousScreen}
               accessibilityLabel="Back"
-            >
-              <Icon as={ArrowLeft} className="size-5" />
-            </Button>
+            />
           ),
         }}
       />
