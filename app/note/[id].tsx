@@ -1,49 +1,41 @@
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
-import { deleteNote, getNoteById, type Note } from '@/lib/dataStorage';
-import { useFocusEffect } from '@react-navigation/native';
+import { useHardwareBackHandler } from '@/hooks/useHardwareBackHandler';
+import { useParsedNumericRouteParam } from '@/hooks/useParsedNumericRouteParam';
+import { LIST_TYPE, deleteNote, getNoteById, type Note } from '@/lib/dataStorage';
 import { useSQLiteContext } from 'expo-sqlite';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { ArrowLeft, PencilIcon, Trash2Icon } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  BackHandler,
-  ScrollView,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, View } from 'react-native';
 
 export default function NoteViewScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { value: noteId, isValid: isValidId } = useParsedNumericRouteParam('id');
   const [note, setNote] = useState<Note | null | 'loading'>('loading');
 
   const loadNote = useCallback(async () => {
-    const numId = id != null ? Number(id) : NaN;
-    if (Number.isNaN(numId)) {
+    if (!isValidId) {
       setNote(null);
       return;
     }
-    const found = await getNoteById(db, numId);
+    const found = await getNoteById(db, noteId);
+    if (found?.type === LIST_TYPE) {
+      router.replace(`/list/${noteId}` as never);
+      return;
+    }
     setNote(found);
-  }, [db, id]);
+  }, [db, isValidId, noteId, router]);
 
   useEffect(() => {
     loadNote();
   }, [loadNote]);
 
-  useFocusEffect(
-    useCallback(() => {
-      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-        router.replace('/');
-        return true;
-      });
-      return () => subscription.remove();
-    }, [router])
-  );
+  useHardwareBackHandler(() => {
+    router.replace('/');
+  });
 
   const handleDeletePress = useCallback(() => {
     if (note === null || note === 'loading') return;
