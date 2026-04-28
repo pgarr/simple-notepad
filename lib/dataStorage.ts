@@ -119,6 +119,13 @@ export const addList = async (db: SQLiteDatabase, list: NewList) => {
   );
 };
 
+export const updateList = async (db: SQLiteDatabase, id: number, list: NewList) => {
+  return await db.runAsync(
+    'UPDATE content SET title = ?, note = ?, type = ? WHERE id = ?',
+    [list.title, stringifyListItems(list.items), LIST_TYPE, id]
+  );
+};
+
 export const getListItemsById = async (
   db: SQLiteDatabase,
   id: number

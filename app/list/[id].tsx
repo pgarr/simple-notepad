@@ -1,6 +1,7 @@
 import { HeaderBackButton } from '@/components/navigation/HeaderBackButton';
 import { ScreenLoadingState } from '@/components/state/ScreenLoadingState';
 import { ScreenNotFoundState } from '@/components/state/ScreenNotFoundState';
+import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { useHardwareBackHandler } from '@/hooks/useHardwareBackHandler';
@@ -14,9 +15,9 @@ import {
 } from '@/lib/dataStorage';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useRouter } from 'expo-router';
-import { CheckSquare2, Square } from 'lucide-react-native';
+import { CheckSquare2, PencilIcon, Square } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
 type ListViewState =
   | 'loading'
@@ -88,6 +89,18 @@ export default function ListViewScreen() {
               onPress={() => router.replace('/')}
               accessibilityLabel="Back to notes"
             />
+          ),
+          headerRight: () => (
+            <View className="flex-row items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onPress={() => router.push(`/edit-list/${listView.id}` as never)}
+                accessibilityLabel="Edit list"
+              >
+                <Icon as={PencilIcon} className="size-5" />
+              </Button>
+            </View>
           ),
         }}
       />
