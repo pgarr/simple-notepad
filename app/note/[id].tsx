@@ -1,49 +1,44 @@
+import { HeaderBackButton } from '@/components/navigation/HeaderBackButton';
+import { ScreenLoadingState } from '@/components/state/ScreenLoadingState';
+import { ScreenNotFoundState } from '@/components/state/ScreenNotFoundState';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
-import { deleteNote, getNoteById, type Note } from '@/lib/dataStorage';
-import { useFocusEffect } from '@react-navigation/native';
+import { useHardwareBackHandler } from '@/hooks/useHardwareBackHandler';
+import { useParsedNumericRouteParam } from '@/hooks/useParsedNumericRouteParam';
+import { LIST_TYPE, deleteNote, getNoteById, type Note } from '@/lib/dataStorage';
 import { useSQLiteContext } from 'expo-sqlite';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, PencilIcon, Trash2Icon } from 'lucide-react-native';
+import { Stack, useRouter } from 'expo-router';
+import { PencilIcon, Trash2Icon } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  BackHandler,
-  ScrollView,
-  View,
-} from 'react-native';
+import { Alert, ScrollView, View } from 'react-native';
 
 export default function NoteViewScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { value: noteId, isValid: isValidId } = useParsedNumericRouteParam('id');
   const [note, setNote] = useState<Note | null | 'loading'>('loading');
 
   const loadNote = useCallback(async () => {
-    const numId = id != null ? Number(id) : NaN;
-    if (Number.isNaN(numId)) {
+    if (!isValidId) {
       setNote(null);
       return;
     }
-    const found = await getNoteById(db, numId);
+    const found = await getNoteById(db, noteId);
+    if (found?.type === LIST_TYPE) {
+      router.replace(`/list/${noteId}` as never);
+      return;
+    }
     setNote(found);
-  }, [db, id]);
+  }, [db, isValidId, noteId, router]);
 
   useEffect(() => {
     loadNote();
   }, [loadNote]);
 
-  useFocusEffect(
-    useCallback(() => {
-      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-        router.replace('/');
-        return true;
-      });
-      return () => subscription.remove();
-    }, [router])
-  );
+  useHardwareBackHandler(() => {
+    router.replace('/');
+  });
 
   const handleDeletePress = useCallback(() => {
     if (note === null || note === 'loading') return;
@@ -65,25 +60,11 @@ export default function NoteViewScreen() {
   }, [db, note, router]);
 
   if (note === 'loading') {
-    return (
-      <>
-        <Stack.Screen options={{ title: '…' }} />
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator />
-        </View>
-      </>
-    );
+    return <ScreenLoadingState />;
   }
 
   if (note === null) {
-    return (
-      <>
-        <Stack.Screen options={{ title: 'Note' }} />
-        <View className="flex-1 items-center justify-center p-4">
-          <Text className="text-muted-foreground">Note not found.</Text>
-        </View>
-      </>
-    );
+    return <ScreenNotFoundState title="Note" message="Note not found." />;
   }
 
   return (
@@ -93,14 +74,10 @@ export default function NoteViewScreen() {
           title: note.title,
           headerBackVisible: false,
           headerLeft: () => (
-            <Button
-              variant="ghost"
-              size="icon"
+            <HeaderBackButton
               onPress={() => router.replace('/')}
               accessibilityLabel="Back to notes"
-            >
-              <Icon as={ArrowLeft} className="size-5" />
-            </Button>
+            />
           ),
           headerRight: () => (
             <View className="flex-row items-center gap-1">

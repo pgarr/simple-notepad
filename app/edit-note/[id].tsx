@@ -1,27 +1,21 @@
-import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icon';
+import { HeaderBackButton } from '@/components/navigation/HeaderBackButton';
 import { NoteForm } from '@/components/NoteForm';
-import { Text } from '@/components/ui/text';
-import {
-  getNoteById,
-  updateNote,
-  type Note,
-} from '@/lib/dataStorage';
-import { useFocusEffect } from '@react-navigation/native';
+import { ScreenLoadingState } from '@/components/state/ScreenLoadingState';
+import { ScreenNotFoundState } from '@/components/state/ScreenNotFoundState';
+import { useHardwareBackHandler } from '@/hooks/useHardwareBackHandler';
+import { useParsedNumericRouteParam } from '@/hooks/useParsedNumericRouteParam';
+import { LIST_TYPE, getNoteById, updateNote, type Note } from '@/lib/dataStorage';
 import { useSQLiteContext } from 'expo-sqlite';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft } from 'lucide-react-native';
+import { Stack, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, BackHandler, View } from 'react-native';
 
 export default function EditNoteScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { rawValue: id, value: noteId, isValid: isValidId } =
+    useParsedNumericRouteParam('id');
   const [note, setNote] = useState<Note | null | 'loading'>('loading');
 
-  const numId = id != null ? Number(id) : NaN;
-  const isValidId = !Number.isNaN(numId);
   const backTarget = isValidId ? `/note/${id}` : '/';
 
   const loadNote = useCallback(async () => {
@@ -29,9 +23,13 @@ export default function EditNoteScreen() {
       setNote(null);
       return;
     }
-    const found = await getNoteById(db, numId);
+    const found = await getNoteById(db, noteId);
+    if (found?.type === LIST_TYPE) {
+      setNote(null);
+      return;
+    }
     setNote(found);
-  }, [db, numId, isValidId]);
+  }, [db, noteId, isValidId]);
 
   useEffect(() => {
     loadNote();
@@ -40,46 +38,24 @@ export default function EditNoteScreen() {
   const handleSave = useCallback(
     async (title: string, content: string) => {
       if (!isValidId) return;
-      await updateNote(db, numId, { title, note: content });
+      await updateNote(db, noteId, { title, note: content });
       router.replace(`/note/${id}`);
     },
-    [db, numId, id, isValidId, router]
+    [db, noteId, id, isValidId, router]
   );
 
   const handleBackToPreviousScreen = useCallback(() => {
-    router.replace(backTarget);
+    router.replace(backTarget as never);
   }, [backTarget, router]);
 
-  useFocusEffect(
-    useCallback(() => {
-      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-        handleBackToPreviousScreen();
-        return true;
-      });
-      return () => subscription.remove();
-    }, [handleBackToPreviousScreen])
-  );
+  useHardwareBackHandler(handleBackToPreviousScreen);
 
   if (note === 'loading') {
-    return (
-      <>
-        <Stack.Screen options={{ title: '…' }} />
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator />
-        </View>
-      </>
-    );
+    return <ScreenLoadingState />;
   }
 
   if (note === null) {
-    return (
-      <>
-        <Stack.Screen options={{ title: 'Edit note' }} />
-        <View className="flex-1 items-center justify-center p-4">
-          <Text className="text-muted-foreground">Note not found.</Text>
-        </View>
-      </>
-    );
+    return <ScreenNotFoundState title="Edit note" message="Note not found." />;
   }
 
   return (
@@ -89,14 +65,10 @@ export default function EditNoteScreen() {
           title: 'Edit note',
           headerBackVisible: false,
           headerLeft: () => (
-            <Button
-              variant="ghost"
-              size="icon"
+            <HeaderBackButton
               onPress={handleBackToPreviousScreen}
               accessibilityLabel="Back"
-            >
-              <Icon as={ArrowLeft} className="size-5" />
-            </Button>
+            />
           ),
         }}
       />

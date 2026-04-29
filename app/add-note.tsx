@@ -1,14 +1,11 @@
 import { NoteForm } from '@/components/NoteForm';
-import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icon';
+import { HeaderBackButton } from '@/components/navigation/HeaderBackButton';
+import { useHardwareBackHandler } from '@/hooks/useHardwareBackHandler';
 import { addNote } from '@/lib/dataStorage';
-import { useFocusEffect } from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useRouter } from 'expo-router';
 import { Stack } from 'expo-router';
-import { ArrowLeft } from 'lucide-react-native';
 import { useCallback } from 'react';
-import { BackHandler } from 'react-native';
 
 export default function AddNoteScreen() {
   const db = useSQLiteContext();
@@ -22,15 +19,9 @@ export default function AddNoteScreen() {
     [db, router]
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-        router.replace('/');
-        return true;
-      });
-      return () => subscription.remove();
-    }, [router])
-  );
+  useHardwareBackHandler(() => {
+    router.replace('/');
+  });
 
   return (
     <>
@@ -39,14 +30,10 @@ export default function AddNoteScreen() {
           title: 'New note',
           headerBackVisible: false,
           headerLeft: () => (
-            <Button
-              variant="ghost"
-              size="icon"
+            <HeaderBackButton
               onPress={() => router.replace('/')}
               accessibilityLabel="Back to notes"
-            >
-              <Icon as={ArrowLeft} className="size-5" />
-            </Button>
+            />
           ),
         }}
       />
