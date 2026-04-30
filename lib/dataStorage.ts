@@ -42,9 +42,7 @@ const parseListItems = (rawContent: string): ListItem[] => {
 };
 
 const stringifyListItems = (items: ListItem[]) =>
-  JSON.stringify(
-    items.map((item) => ({ checked: !!item.checked, text: item.text.trim() }))
-  );
+  JSON.stringify(items.map((item) => ({ checked: !!item.checked, text: item.text.trim() })));
 
 export const migrateDbIfNeeded = async (db: SQLiteDatabase) => {
   const meta = await db.getFirstAsync<{
@@ -60,18 +58,14 @@ export const migrateDbIfNeeded = async (db: SQLiteDatabase) => {
   `);
   }
   if (!meta || meta.user_version < 2) {
-    const columns = await db.getAllAsync<{ name: string }>(
-      'PRAGMA table_info(content)'
-    );
+    const columns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(content)');
     const hasTypeColumn = columns.some((column) => column.name === 'type');
     if (!hasTypeColumn) {
       await db.execAsync(
         `ALTER TABLE content ADD COLUMN type INTEGER NOT NULL DEFAULT ${NOTE_TYPE};`
       );
     }
-    await db.runAsync(
-      `UPDATE content SET type = ${NOTE_TYPE} WHERE type IS NULL`
-    );
+    await db.runAsync(`UPDATE content SET type = ${NOTE_TYPE} WHERE type IS NULL`);
   }
   await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
 };
@@ -80,50 +74,47 @@ export const getAllNotes = async (db: SQLiteDatabase): Promise<Note[]> => {
   return await db.getAllAsync<Note>('SELECT * FROM content');
 };
 
-export const getNoteById = async (
-  db: SQLiteDatabase,
-  id: number
-): Promise<Note | null> => {
-  const row = await db.getFirstAsync<Note>('SELECT * FROM content WHERE id = ?', [
-    id,
-  ]);
+export const getNoteById = async (db: SQLiteDatabase, id: number): Promise<Note | null> => {
+  const row = await db.getFirstAsync<Note>('SELECT * FROM content WHERE id = ?', [id]);
   return row ?? null;
 };
 
 export const addNote = async (db: SQLiteDatabase, note: NewNote) => {
-  return await db.runAsync(
-    'INSERT INTO content (title, note, type) VALUES (?, ?, ?)',
-    [note.title, note.note, NOTE_TYPE]
-  );
+  return await db.runAsync('INSERT INTO content (title, note, type) VALUES (?, ?, ?)', [
+    note.title,
+    note.note,
+    NOTE_TYPE,
+  ]);
 };
 
-export const updateNote = async (
-  db: SQLiteDatabase,
-  id: number,
-  note: NewNote
-) => {
-  return await db.runAsync(
-    'UPDATE content SET title = ?, note = ?, type = ? WHERE id = ?',
-    [note.title, note.note, NOTE_TYPE, id]
-  );
+export const updateNote = async (db: SQLiteDatabase, id: number, note: NewNote) => {
+  return await db.runAsync('UPDATE content SET title = ?, note = ?, type = ? WHERE id = ?', [
+    note.title,
+    note.note,
+    NOTE_TYPE,
+    id,
+  ]);
 };
 
-export const deleteNote = async (db: SQLiteDatabase, id: number) => {
+export const deletePosition = async (db: SQLiteDatabase, id: number) => {
   return await db.runAsync('DELETE FROM content WHERE id = ?', [id]);
 };
 
 export const addList = async (db: SQLiteDatabase, list: NewList) => {
-  return await db.runAsync(
-    'INSERT INTO content (title, note, type) VALUES (?, ?, ?)',
-    [list.title, stringifyListItems(list.items), LIST_TYPE]
-  );
+  return await db.runAsync('INSERT INTO content (title, note, type) VALUES (?, ?, ?)', [
+    list.title,
+    stringifyListItems(list.items),
+    LIST_TYPE,
+  ]);
 };
 
 export const updateList = async (db: SQLiteDatabase, id: number, list: NewList) => {
-  return await db.runAsync(
-    'UPDATE content SET title = ?, note = ?, type = ? WHERE id = ?',
-    [list.title, stringifyListItems(list.items), LIST_TYPE, id]
-  );
+  return await db.runAsync('UPDATE content SET title = ?, note = ?, type = ? WHERE id = ?', [
+    list.title,
+    stringifyListItems(list.items),
+    LIST_TYPE,
+    id,
+  ]);
 };
 
 export const getListItemsById = async (
@@ -138,13 +129,10 @@ export const getListItemsById = async (
   return parseListItems(list.note);
 };
 
-export const updateListItems = async (
-  db: SQLiteDatabase,
-  id: number,
-  items: ListItem[]
-) => {
-  return await db.runAsync(
-    'UPDATE content SET note = ? WHERE id = ? AND type = ?',
-    [stringifyListItems(items), id, LIST_TYPE]
-  );
+export const updateListItems = async (db: SQLiteDatabase, id: number, items: ListItem[]) => {
+  return await db.runAsync('UPDATE content SET note = ? WHERE id = ? AND type = ?', [
+    stringifyListItems(items),
+    id,
+    LIST_TYPE,
+  ]);
 };

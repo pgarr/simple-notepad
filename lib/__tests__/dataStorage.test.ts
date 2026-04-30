@@ -3,7 +3,7 @@ import {
   NOTE_TYPE,
   addList,
   addNote,
-  deleteNote,
+  deletePosition,
   getAllNotes,
   getListItemsById,
   getNoteById,
@@ -129,7 +129,7 @@ describe('lib/dataStorage', () => {
       const db = makeDb();
       db.runAsync.mockResolvedValue({ changes: 1 });
 
-      await deleteNote(db as any, 7);
+      await deletePosition(db as any, 7);
 
       const [sql, params] = db.runAsync.mock.calls[0];
       expect(sql).toBe('DELETE FROM content WHERE id = ?');
@@ -270,4 +270,3 @@ describe('lib/dataStorage', () => {
     });
   });
 });
-

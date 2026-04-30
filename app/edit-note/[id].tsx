@@ -4,7 +4,7 @@ import { ScreenLoadingState } from '@/components/state/ScreenLoadingState';
 import { ScreenNotFoundState } from '@/components/state/ScreenNotFoundState';
 import { useHardwareBackHandler } from '@/hooks/useHardwareBackHandler';
 import { useParsedNumericRouteParam } from '@/hooks/useParsedNumericRouteParam';
-import { LIST_TYPE, getNoteById, updateNote, type Note } from '@/lib/dataStorage';
+import { NOTE_TYPE, getNoteById, updateNote, type Note } from '@/lib/dataStorage';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
@@ -12,8 +12,7 @@ import { useCallback, useEffect, useState } from 'react';
 export default function EditNoteScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
-  const { rawValue: id, value: noteId, isValid: isValidId } =
-    useParsedNumericRouteParam('id');
+  const { rawValue: id, value: noteId, isValid: isValidId } = useParsedNumericRouteParam('id');
   const [note, setNote] = useState<Note | null | 'loading'>('loading');
 
   const backTarget = isValidId ? `/note/${id}` : '/';
@@ -24,7 +23,7 @@ export default function EditNoteScreen() {
       return;
     }
     const found = await getNoteById(db, noteId);
-    if (found?.type === LIST_TYPE) {
+    if (found?.type !== NOTE_TYPE) {
       setNote(null);
       return;
     }
@@ -65,18 +64,11 @@ export default function EditNoteScreen() {
           title: 'Edit note',
           headerBackVisible: false,
           headerLeft: () => (
-            <HeaderBackButton
-              onPress={handleBackToPreviousScreen}
-              accessibilityLabel="Back"
-            />
+            <HeaderBackButton onPress={handleBackToPreviousScreen} accessibilityLabel="Back" />
           ),
         }}
       />
-      <NoteForm
-        initialTitle={note.title}
-        initialContent={note.note}
-        onSave={handleSave}
-      />
+      <NoteForm initialTitle={note.title} initialContent={note.note} onSave={handleSave} />
     </>
   );
 }
