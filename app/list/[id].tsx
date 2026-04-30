@@ -12,12 +12,13 @@ import {
   getNoteById,
   type ListItem,
   updateListItems,
+  deletePosition,
 } from '@/lib/dataStorage';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useRouter } from 'expo-router';
-import { CheckSquare2, PencilIcon, Square } from 'lucide-react-native';
+import { CheckSquare2, PencilIcon, Square, Trash2Icon } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Alert, Pressable, ScrollView, View } from 'react-native';
 
 type ListViewState =
   | 'loading'
@@ -70,6 +71,21 @@ export default function ListViewScreen() {
     [db, listView]
   );
 
+  const handleDeletePress = useCallback(() => {
+    if (listView === null || listView === 'loading') return;
+    Alert.alert('Delete list', 'Are you sure you want to delete this list?', [
+      { text: 'No', style: 'cancel' },
+      {
+        text: 'Yes',
+        style: 'destructive',
+        onPress: async () => {
+          await deletePosition(db, listView.id);
+          router.replace('/');
+        },
+      },
+    ]);
+  }, [db, listView, router]);
+
   if (listView === 'loading') {
     return <ScreenLoadingState />;
   }
@@ -96,9 +112,15 @@ export default function ListViewScreen() {
                 variant="ghost"
                 size="icon"
                 onPress={() => router.push(`/edit-list/${listView.id}` as never)}
-                accessibilityLabel="Edit list"
-              >
+                accessibilityLabel="Edit list">
                 <Icon as={PencilIcon} className="size-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onPress={handleDeletePress}
+                accessibilityLabel="Delete list">
+                <Icon as={Trash2Icon} className="size-5" />
               </Button>
             </View>
           ),
@@ -111,8 +133,7 @@ export default function ListViewScreen() {
             className="flex-row items-center gap-3 rounded-md border border-border px-3 py-2"
             onPress={() => void handleToggleItem(index)}
             accessibilityRole="checkbox"
-            accessibilityState={{ checked: item.checked }}
-          >
+            accessibilityState={{ checked: item.checked }}>
             <Icon as={item.checked ? CheckSquare2 : Square} className="size-5 text-foreground" />
             <Text className={item.checked ? 'text-muted-foreground line-through' : ''}>
               {item.text}

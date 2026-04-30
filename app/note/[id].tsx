@@ -6,7 +6,7 @@ import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { useHardwareBackHandler } from '@/hooks/useHardwareBackHandler';
 import { useParsedNumericRouteParam } from '@/hooks/useParsedNumericRouteParam';
-import { LIST_TYPE, deleteNote, getNoteById, type Note } from '@/lib/dataStorage';
+import { LIST_TYPE, deletePosition, getNoteById, type Note } from '@/lib/dataStorage';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useRouter } from 'expo-router';
 import { PencilIcon, Trash2Icon } from 'lucide-react-native';
@@ -42,21 +42,17 @@ export default function NoteViewScreen() {
 
   const handleDeletePress = useCallback(() => {
     if (note === null || note === 'loading') return;
-    Alert.alert(
-      'Delete note',
-      'Are you sure you want to delete this note?',
-      [
-        { text: 'No', style: 'cancel' },
-        {
-          text: 'Yes',
-          style: 'destructive',
-          onPress: async () => {
-            await deleteNote(db, note.id);
-            router.replace('/');
-          },
+    Alert.alert('Delete note', 'Are you sure you want to delete this note?', [
+      { text: 'No', style: 'cancel' },
+      {
+        text: 'Yes',
+        style: 'destructive',
+        onPress: async () => {
+          await deletePosition(db, note.id);
+          router.replace('/');
         },
-      ]
-    );
+      },
+    ]);
   }, [db, note, router]);
 
   if (note === 'loading') {
@@ -85,16 +81,14 @@ export default function NoteViewScreen() {
                 variant="ghost"
                 size="icon"
                 onPress={() => router.push(`/edit-note/${note.id}`)}
-                accessibilityLabel="Edit note"
-              >
+                accessibilityLabel="Edit note">
                 <Icon as={PencilIcon} className="size-5" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 onPress={handleDeletePress}
-                accessibilityLabel="Delete note"
-              >
+                accessibilityLabel="Delete note">
                 <Icon as={Trash2Icon} className="size-5" />
               </Button>
             </View>
