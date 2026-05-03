@@ -1,34 +1,49 @@
-# Minimal Template
+# Simple Notepad
 
-This is a [React Native](https://reactnative.dev/) project built with [Expo](https://expo.dev/) and [React Native Reusables](https://reactnativereusables.com).
+A lightweight cross-platform notes and checklist app built with [React Native](https://reactnative.dev/) and [Expo](https://expo.dev/). Create, manage, and organize your notes and checklists with persistent local storage via SQLite.
 
-It was initialized using the following command:
+## Features
 
-```bash
-npx @react-native-reusables/cli@latest init -t simple-notepad
-```
+- ✍️ Create and edit notes with a clean, intuitive interface
+- ☑️ Create and manage checklist items with check/uncheck functionality
+- 💾 All data persisted locally in SQLite database
+- 🎨 Responsive UI powered by Tailwind CSS via NativeWind
+- 📱 Runs seamlessly on iOS, Android, and Web
+- 🔥 Edge-to-Edge display support
 
 ## Getting Started
 
-To run the development server:
+### Running the App
+
+Start the development server:
 
 ```bash
-    npm run dev
-    # or
-    yarn dev
-    # or
-    pnpm dev
-    # or
-    bun dev
+npm run dev
 ```
 
-This will start the Expo Dev Server. Open the app in:
+Then open the app in your preferred platform:
 
 - **iOS**: press `i` to launch in the iOS simulator _(Mac only)_
 - **Android**: press `a` to launch in the Android emulator
 - **Web**: press `w` to run in a browser
 
-You can also scan the QR code using the [Expo Go](https://expo.dev/go) app on your device. This project fully supports running in Expo Go for quick testing on physical devices.
+Alternatively, you can scan the QR code using the [Expo Go](https://expo.dev/go) app on your physical device.
+
+### Available Scripts
+
+From `package.json`:
+
+```bash
+npm run dev              # Start development server
+npm run android         # Build and run on Android
+npm run prebuild        # Generate native projects
+npm run test-watch      # Run tests in watch mode
+npm run test-ci         # Run tests (CI mode)
+npm run clean           # Clean build artifacts and dependencies
+npm run bump:patch      # Bump patch version
+npm run bump:minor      # Bump minor version
+npm run bump:major      # Bump major version
+```
 
 ## Adding components
 
@@ -51,23 +66,20 @@ If you don't specify any component names, you'll be prompted to select which com
 - 🔥 Edge to Edge enabled
 - 📱 Runs on iOS, Android, and Web
 
+## Architecture
+
+- **Routing**: File-based routing with [Expo Router](https://expo.dev/router) under `app/` directory
+- **Storage**: Local SQLite database via `expo-sqlite` with automated migrations
+- **State Management**: React hooks and component state
+- **Data Layer**: Centralized CRUD helpers in `lib/dataStorage.ts`
+
 ## Learn More
 
 To dive deeper into the technologies used:
 
 - [React Native Docs](https://reactnative.dev/docs/getting-started)
 - [Expo Docs](https://docs.expo.dev/)
+- [Expo Router Guide](https://expo.dev/router)
 - [Nativewind Docs](https://www.nativewind.dev/)
 - [React Native Reusables](https://reactnativereusables.com)
-
-## Deploy with EAS
-
-The easiest way to deploy your app is with [Expo Application Services (EAS)](https://expo.dev/eas).
-
-- [EAS Build](https://docs.expo.dev/build/introduction/)
-- [EAS Updates](https://docs.expo.dev/eas-update/introduction/)
-- [EAS Submit](https://docs.expo.dev/submit/introduction/)
-
----
-
-If you enjoy using React Native Reusables, please consider giving it a ⭐ on [GitHub](https://github.com/founded-labs/react-native-reusables). Your support means a lot!
+- [SQLite with Expo](https://docs.expo.dev/versions/latest/sdk/sqlite/)

@@ -1,10 +1,13 @@
 {
   "name": "simple-notepad",
   "main": "expo-router/entry",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "scripts": {
     "prebuild": "expo prebuild --clean",
+    "dev": "expo start",
     "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo run:web",
     "test-watch": "jest --watchAll",
     "test-ci": "jest --no-watchman --runInBand",
     "clean": "rm -rf .expo node_modules",
