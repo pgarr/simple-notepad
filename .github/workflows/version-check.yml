@@ -1,0 +1,46 @@
+name: Version Check
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get PR version
+        id: pr_version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Get base branch version
+        id: base_version
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          BASE_VERSION=$(git show origin/${{ github.base_ref }}:package.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version")
+          echo "version=$BASE_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Compare versions
+        run: |
+          PR="${{ steps.pr_version.outputs.version }}"
+          BASE="${{ steps.base_version.outputs.version }}"
+          echo "Base (main): $BASE"
+          echo "PR:          $PR"
+
+          node -e "
+            const semver = (v) => v.split('.').map(Number);
+            const [bM, bm, bp] = semver('$BASE');
+            const [pM, pm, pp] = semver('$PR');
+            const isHigher =
+              pM > bM ||
+              (pM === bM && pm > bm) ||
+              (pM === bM && pm === bm && pp > bp);
+            if (!isHigher) {
+              console.error('Version must be bumped. Run npm run bump:patch/minor/major before pushing.');
+              process.exit(1);
+            }
+            console.log('Version bump detected. OK.');
+          "
