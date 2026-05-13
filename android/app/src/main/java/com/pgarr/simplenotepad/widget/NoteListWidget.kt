@@ -32,6 +32,9 @@ class NoteListWidget : AppWidgetProvider() {
             for (widgetId in ids) {
                 updateWidget(context, appWidgetManager, widgetId)
             }
+            if (ids.isNotEmpty()) {
+                appWidgetManager.notifyAppWidgetViewDataChanged(ids, R.id.widget_list_view)
+            }
         }
 
         fun updateWidget(

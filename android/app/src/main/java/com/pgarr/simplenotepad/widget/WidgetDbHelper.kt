@@ -27,11 +27,7 @@ object WidgetDbHelper {
 
     private fun openDbWritable(context: Context): SQLiteDatabase {
         val path = getDbPath(context)
-        return SQLiteDatabase.openDatabase(path, null, SQLiteDatabase.OPEN_READWRITE).apply {
-            if (!isWriteAheadLoggingEnabled) {
-                enableWriteAheadLogging()
-            }
-        }
+        return SQLiteDatabase.openDatabase(path, null, SQLiteDatabase.OPEN_READWRITE)
     }
 
     /**
@@ -88,9 +84,6 @@ object WidgetDbHelper {
                 stmt.bindLong(3, LIST_TYPE.toLong())
                 stmt.executeUpdateDelete()
                 stmt.close()
-
-                // Help other connections (expo-sqlite) see the write promptly when using WAL.
-                db.rawQuery("PRAGMA wal_checkpoint(PASSIVE)", null)?.close()
             }
         } catch (_: Exception) {}
     }

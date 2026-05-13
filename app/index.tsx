@@ -7,8 +7,8 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { PlusIcon } from 'lucide-react-native';
-import { useCallback, useState } from 'react';
-import { BackHandler, Pressable, ScrollView } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { AppState, type AppStateStatus, BackHandler, Pressable, ScrollView } from 'react-native';
 
 export default function Screen() {
   const db = useSQLiteContext();
@@ -31,6 +31,16 @@ export default function Screen() {
       return () => subscription.remove();
     }, [loadNotes])
   );
+
+  useEffect(() => {
+    const onAppState = (state: AppStateStatus) => {
+      if (state === 'active') {
+        loadNotes();
+      }
+    };
+    const sub = AppState.addEventListener('change', onAppState);
+    return () => sub.remove();
+  }, [loadNotes]);
 
   return (
     <>

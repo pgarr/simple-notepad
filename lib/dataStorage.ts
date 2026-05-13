@@ -1,8 +1,9 @@
 import { type SQLiteDatabase } from 'expo-sqlite';
+import { NativeModules, Platform } from 'react-native';
 
 export const SQLITE_DATABASE_NAME = 'notes.db';
 
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 3;
 
 export const NOTE_TYPE = 0 as const;
 export const LIST_TYPE = 1 as const;
@@ -46,6 +47,12 @@ const parseListItems = (rawContent: string): ListItem[] => {
 const stringifyListItems = (items: ListItem[]) =>
   JSON.stringify(items.map((item) => ({ checked: !!item.checked, text: item.text.trim() })));
 
+/** Home-screen widget reads `content`; refresh right after app writes (listener alone can lag behind minimize). */
+function syncAndroidNoteListWidgetFromApp(): void {
+  if (Platform.OS !== 'android') return;
+  NativeModules.WidgetRefresh?.refreshNoteListWidgets?.();
+}
+
 export const migrateDbIfNeeded = async (db: SQLiteDatabase) => {
   const meta = await db.getFirstAsync<{
     user_version: number;
@@ -55,7 +62,7 @@ export const migrateDbIfNeeded = async (db: SQLiteDatabase) => {
   }
   if (!meta || meta.user_version === 0) {
     await db.execAsync(`
-  PRAGMA journal_mode = 'wal';
+  PRAGMA journal_mode = DELETE;
   CREATE TABLE content (id INTEGER PRIMARY KEY NOT NULL, title TEXT NOT NULL, note TEXT NOT NULL);
   `);
   }
@@ -68,6 +75,11 @@ export const migrateDbIfNeeded = async (db: SQLiteDatabase) => {
       );
     }
     await db.runAsync(`UPDATE content SET type = ${NOTE_TYPE} WHERE type IS NULL`);
+  }
+  if (!meta || meta.user_version < 3) {
+    // The Android widget uses android.database.sqlite on this file. WAL + two SQLite stacks can
+    // corrupt the DB ("disk image is malformed"); DELETE mode is safe for both readers/writers.
+    await db.execAsync(`PRAGMA journal_mode = DELETE`);
   }
   await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
 };
@@ -82,41 +94,51 @@ export const getNoteById = async (db: SQLiteDatabase, id: number): Promise<Note 
 };
 
 export const addNote = async (db: SQLiteDatabase, note: NewNote) => {
-  return await db.runAsync('INSERT INTO content (title, note, type) VALUES (?, ?, ?)', [
+  const result = await db.runAsync('INSERT INTO content (title, note, type) VALUES (?, ?, ?)', [
     note.title,
     note.note,
     NOTE_TYPE,
   ]);
+  syncAndroidNoteListWidgetFromApp();
+  return result;
 };
 
 export const updateNote = async (db: SQLiteDatabase, id: number, note: NewNote) => {
-  return await db.runAsync('UPDATE content SET title = ?, note = ?, type = ? WHERE id = ?', [
+  const result = await db.runAsync('UPDATE content SET title = ?, note = ?, type = ? WHERE id = ?', [
     note.title,
     note.note,
     NOTE_TYPE,
     id,
   ]);
+  syncAndroidNoteListWidgetFromApp();
+  return result;
 };
 
 export const deletePosition = async (db: SQLiteDatabase, id: number) => {
-  return await db.runAsync('DELETE FROM content WHERE id = ?', [id]);
+  const result = await db.runAsync('DELETE FROM content WHERE id = ?', [id]);
+  syncAndroidNoteListWidgetFromApp();
+  return result;
 };
 
 export const addList = async (db: SQLiteDatabase, list: NewList) => {
-  return await db.runAsync('INSERT INTO content (title, note, type) VALUES (?, ?, ?)', [
+  const result = await db.runAsync('INSERT INTO content (title, note, type) VALUES (?, ?, ?)', [
     list.title,
     stringifyListItems(list.items),
     LIST_TYPE,
   ]);
+  syncAndroidNoteListWidgetFromApp();
+  return result;
 };
 
 export const updateList = async (db: SQLiteDatabase, id: number, list: NewList) => {
-  return await db.runAsync('UPDATE content SET title = ?, note = ?, type = ? WHERE id = ?', [
+  const result = await db.runAsync('UPDATE content SET title = ?, note = ?, type = ? WHERE id = ?', [
     list.title,
     stringifyListItems(list.items),
     LIST_TYPE,
     id,
   ]);
+  syncAndroidNoteListWidgetFromApp();
+  return result;
 };
 
 export const getListItemsById = async (
@@ -132,9 +154,11 @@ export const getListItemsById = async (
 };
 
 export const updateListItems = async (db: SQLiteDatabase, id: number, items: ListItem[]) => {
-  return await db.runAsync('UPDATE content SET note = ? WHERE id = ? AND type = ?', [
+  const result = await db.runAsync('UPDATE content SET note = ? WHERE id = ? AND type = ?', [
     stringifyListItems(items),
     id,
     LIST_TYPE,
   ]);
+  syncAndroidNoteListWidgetFromApp();
+  return result;
 };
