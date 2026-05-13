@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="12dp"
+    android:padding="8dp"
     android:background="@drawable/widget_background">
 
     <TextView
@@ -14,8 +14,8 @@
         android:layout_height="wrap_content"
         android:textSize="16sp"
         android:textStyle="bold"
-        android:textColor="#FFFFFF"
-        android:paddingBottom="8dp"
+        android:textColor="@color/widget_text_primary"
+        android:paddingBottom="6dp"
         android:maxLines="1"
         android:ellipsize="end"
         android:text="My List" />

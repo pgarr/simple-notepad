@@ -15,8 +15,7 @@ object WidgetDbHelper {
     private const val LIST_TYPE = 1
 
     private fun getDbPath(context: Context): String {
-        // expo-sqlite stores DBs here on Android
-        return context.getDatabasePath(DB_NAME).absolutePath
+        return context.filesDir.absolutePath + "/SQLite/" + DB_NAME
     }
 
     /**

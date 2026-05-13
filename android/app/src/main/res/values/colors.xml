@@ -3,4 +3,8 @@
   <color name="iconBackground">#ffffff</color>
   <color name="colorPrimary">#023c69</color>
   <color name="colorPrimaryDark">#ffffff</color>
+  <!-- Light theme (matches app global.css / theme.ts) -->
+  <color name="widget_surface">#FFFFFF</color>
+  <color name="widget_border">#E5E5E5</color>
+  <color name="widget_text_primary">#0A0A0A</color>
 </resources>
