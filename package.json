@@ -3,7 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.2.1",
   "scripts": {
-    "prebuild": "expo prebuild --clean",
+    "prebuild": "expo prebuild",
     "dev": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",

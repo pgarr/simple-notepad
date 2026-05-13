@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp">
+
+    <!-- Checkbox is faked with an ImageView; RemoteViews can't use CheckBox interactively -->
+    <ImageView
+        android:id="@+id/item_checkbox"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@android:drawable/checkbox_off_background"
+        android:contentDescription="Toggle item" />
+
+    <TextView
+        android:id="@+id/item_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textSize="14sp"
+        android:textColor="#FFFFFF"
+        android:paddingStart="10dp"
+        android:maxLines="2"
+        android:ellipsize="end" />
+
+</LinearLayout>

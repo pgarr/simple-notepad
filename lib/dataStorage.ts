@@ -1,5 +1,7 @@
 import { type SQLiteDatabase } from 'expo-sqlite';
 
+export const SQLITE_DATABASE_NAME = 'notes.db';
+
 const DATABASE_VERSION = 2;
 
 export const NOTE_TYPE = 0 as const;

@@ -1,6 +1,6 @@
 import '@/global.css';
 
-import { migrateDbIfNeeded } from '@/lib/dataStorage';
+import { migrateDbIfNeeded, SQLITE_DATABASE_NAME } from '@/lib/dataStorage';
 import { NAV_THEME } from '@/lib/theme';
 import { ThemeProvider } from '@react-navigation/native';
 import { PortalHost } from '@rn-primitives/portal';
@@ -19,7 +19,7 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={NAV_THEME[colorScheme ?? 'light']}>
-      <SQLiteProvider databaseName="notes.db" onInit={migrateDbIfNeeded}>
+      <SQLiteProvider databaseName={SQLITE_DATABASE_NAME} onInit={migrateDbIfNeeded}>
         <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
         <Stack />
         <PortalHost />
