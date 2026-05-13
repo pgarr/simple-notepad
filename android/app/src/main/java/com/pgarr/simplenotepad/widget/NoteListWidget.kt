@@ -3,6 +3,7 @@ package com.pgarr.simplenotepad.widget
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -24,6 +25,15 @@ class NoteListWidget : AppWidgetProvider() {
     }
 
     companion object {
+        fun refreshAllWidgets(context: Context) {
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            val component = ComponentName(context, NoteListWidget::class.java)
+            val ids = appWidgetManager.getAppWidgetIds(component)
+            for (widgetId in ids) {
+                updateWidget(context, appWidgetManager, widgetId)
+            }
+        }
+
         fun updateWidget(
             context: Context,
             appWidgetManager: AppWidgetManager,

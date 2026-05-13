@@ -14,11 +14,12 @@ import {
   updateListItems,
   deletePosition,
 } from '@/lib/dataStorage';
+import { useFocusEffect } from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useRouter } from 'expo-router';
 import { CheckSquare2, ListChecks, PencilIcon, Square, Trash2Icon } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { Alert, AppState, type AppStateStatus, Pressable, ScrollView, View } from 'react-native';
 
 type ListViewState =
   | 'loading'
@@ -51,8 +52,20 @@ export default function ListViewScreen() {
     setListView({ id: listId, title: content.title, items });
   }, [db, isValidId, listId]);
 
+  useFocusEffect(
+    useCallback(() => {
+      loadList();
+    }, [loadList])
+  );
+
   useEffect(() => {
-    loadList();
+    const onAppState = (state: AppStateStatus) => {
+      if (state === 'active') {
+        loadList();
+      }
+    };
+    const sub = AppState.addEventListener('change', onAppState);
+    return () => sub.remove();
   }, [loadList]);
 
   useHardwareBackHandler(() => {

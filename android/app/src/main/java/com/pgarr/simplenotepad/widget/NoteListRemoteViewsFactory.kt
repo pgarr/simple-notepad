@@ -8,19 +8,27 @@ import com.pgarr.simplenotepad.R
 
 class NoteListRemoteViewsFactory(
     private val context: Context,
-    private val listId: Int
+    @Suppress("UNUSED_PARAMETER") private val listId: Int
 ) : RemoteViewsService.RemoteViewsFactory {
 
     private var items: List<WidgetListItem> = emptyList()
     private var listTitle: String = ""
+    /** Id of the list rows are from — always aligned with [onDataSetChanged] (latest list). */
+    private var boundListId: Int = -1
 
     override fun onCreate() {}
 
     override fun onDataSetChanged() {
-        // Called on widget refresh — re-read from SQLite
         val list = WidgetDbHelper.getLatestList(context)
-        items = list?.items ?: emptyList()
-        listTitle = list?.title ?: ""
+        if (list == null) {
+            items = emptyList()
+            listTitle = ""
+            boundListId = -1
+            return
+        }
+        items = list.items
+        listTitle = list.title
+        boundListId = list.id
     }
 
     override fun onDestroy() {}
@@ -47,7 +55,7 @@ class NoteListRemoteViewsFactory(
         // Fill-in intent carries position and listId to the broadcast receiver
         val fillIntent = Intent().apply {
             putExtra("item_index", position)
-            putExtra("list_id", listId)
+            putExtra("list_id", boundListId)
         }
         rv.setOnClickFillInIntent(R.id.item_checkbox, fillIntent)
         rv.setOnClickFillInIntent(R.id.item_text, fillIntent)
