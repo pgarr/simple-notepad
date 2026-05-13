@@ -14,11 +14,12 @@ import {
   updateListItems,
   deletePosition,
 } from '@/lib/dataStorage';
+import { useFocusEffect } from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useRouter } from 'expo-router';
-import { CheckSquare2, PencilIcon, Square, Trash2Icon } from 'lucide-react-native';
+import { CheckSquare2, ListChecks, PencilIcon, Square, Trash2Icon } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { Alert, AppState, type AppStateStatus, Pressable, ScrollView, View } from 'react-native';
 
 type ListViewState =
   | 'loading'
@@ -51,8 +52,20 @@ export default function ListViewScreen() {
     setListView({ id: listId, title: content.title, items });
   }, [db, isValidId, listId]);
 
+  useFocusEffect(
+    useCallback(() => {
+      loadList();
+    }, [loadList])
+  );
+
   useEffect(() => {
-    loadList();
+    const onAppState = (state: AppStateStatus) => {
+      if (state === 'active') {
+        loadList();
+      }
+    };
+    const sub = AppState.addEventListener('change', onAppState);
+    return () => sub.remove();
   }, [loadList]);
 
   useHardwareBackHandler(() => {
@@ -70,6 +83,14 @@ export default function ListViewScreen() {
     },
     [db, listView]
   );
+
+  const handleToggleAllChecked = useCallback(async () => {
+    if (listView === 'loading' || listView === null || listView.items.length === 0) return;
+    const allChecked = listView.items.every((item) => item.checked);
+    const updatedItems = listView.items.map((item) => ({ ...item, checked: !allChecked }));
+    setListView({ ...listView, items: updatedItems });
+    await updateListItems(db, listView.id, updatedItems);
+  }, [db, listView]);
 
   const handleDeletePress = useCallback(() => {
     if (listView === null || listView === 'loading') return;
@@ -106,24 +127,38 @@ export default function ListViewScreen() {
               accessibilityLabel="Back to notes"
             />
           ),
-          headerRight: () => (
-            <View className="flex-row items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onPress={() => router.push(`/edit-list/${listView.id}` as never)}
-                accessibilityLabel="Edit list">
-                <Icon as={PencilIcon} className="size-5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onPress={handleDeletePress}
-                accessibilityLabel="Delete list">
-                <Icon as={Trash2Icon} className="size-5" />
-              </Button>
-            </View>
-          ),
+          headerRight: () => {
+            const allChecked =
+              listView.items.length > 0 && listView.items.every((item) => item.checked);
+            return (
+              <View className="flex-row items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  disabled={listView.items.length === 0}
+                  onPress={() => void handleToggleAllChecked()}
+                  accessibilityLabel={allChecked ? 'Uncheck all items' : 'Check all items'}>
+                  <Icon as={ListChecks} className="size-5" />
+                </Button>
+                <View className="flex-row items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onPress={() => router.push(`/edit-list/${listView.id}` as never)}
+                    accessibilityLabel="Edit list">
+                    <Icon as={PencilIcon} className="size-5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onPress={handleDeletePress}
+                    accessibilityLabel="Delete list">
+                    <Icon as={Trash2Icon} className="size-5" />
+                  </Button>
+                </View>
+              </View>
+            );
+          },
         }}
       />
       <ScrollView className="flex-1" contentContainerClassName="gap-2 p-4">

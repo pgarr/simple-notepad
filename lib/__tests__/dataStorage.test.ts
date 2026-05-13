@@ -32,7 +32,7 @@ describe('lib/dataStorage', () => {
   describe('migrateDbIfNeeded', () => {
     it('early-returns when PRAGMA user_version >= DATABASE_VERSION', async () => {
       const db = makeDb();
-      db.getFirstAsync.mockResolvedValue({ user_version: 2 });
+      db.getFirstAsync.mockResolvedValue({ user_version: 3 });
 
       await migrateDbIfNeeded(db as any);
 
@@ -40,6 +40,17 @@ describe('lib/dataStorage', () => {
       expect(db.execAsync).not.toHaveBeenCalled();
       expect(db.getAllAsync).not.toHaveBeenCalled();
       expect(db.runAsync).not.toHaveBeenCalled();
+    });
+
+    it('migrates v2 to v3 by switching journal mode off WAL', async () => {
+      const db = makeDb();
+      db.getFirstAsync.mockResolvedValue({ user_version: 2 });
+      db.execAsync.mockResolvedValue(undefined);
+
+      await migrateDbIfNeeded(db as any);
+
+      expect(db.execAsync).toHaveBeenCalledWith('PRAGMA journal_mode = DELETE');
+      expect(db.execAsync).toHaveBeenCalledWith('PRAGMA user_version = 3');
     });
 
     it('creates base table and adds type column when meta is missing and type is absent', async () => {
@@ -51,6 +62,7 @@ describe('lib/dataStorage', () => {
 
       await migrateDbIfNeeded(db as any);
 
+      expect(db.execAsync).toHaveBeenCalledWith(expect.stringContaining('PRAGMA journal_mode = DELETE'));
       expect(db.execAsync).toHaveBeenCalledWith(expect.stringContaining('CREATE TABLE content'));
       expect(db.getAllAsync).toHaveBeenCalledWith('PRAGMA table_info(content)');
       expect(db.execAsync).toHaveBeenCalledWith(
@@ -59,7 +71,8 @@ describe('lib/dataStorage', () => {
       expect(db.runAsync).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE content SET type =')
       );
-      expect(db.execAsync).toHaveBeenCalledWith('PRAGMA user_version = 2');
+      expect(db.execAsync).toHaveBeenCalledWith('PRAGMA journal_mode = DELETE');
+      expect(db.execAsync).toHaveBeenCalledWith('PRAGMA user_version = 3');
     });
 
     it('when user_version is old and type column exists, it skips ALTER TABLE but sets default types', async () => {
@@ -80,7 +93,8 @@ describe('lib/dataStorage', () => {
       expect(db.runAsync).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE content SET type =')
       );
-      expect(db.execAsync).toHaveBeenCalledWith('PRAGMA user_version = 2');
+      expect(db.execAsync).toHaveBeenCalledWith('PRAGMA journal_mode = DELETE');
+      expect(db.execAsync).toHaveBeenCalledWith('PRAGMA user_version = 3');
     });
   });
 

@@ -12,7 +12,9 @@ import {
 } from '@/lib/dataStorage';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Stack, useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useEffect, useState } from 'react';
+import { AppState, type AppStateStatus } from 'react-native';
 import { ListForm } from '@/components/ListForm';
 
 type ListEditState =
@@ -49,8 +51,20 @@ export default function EditListScreen() {
     setList({ title: content.title, items: loadedItems });
   }, [db, isValidId, listId]);
 
+  useFocusEffect(
+    useCallback(() => {
+      loadList();
+    }, [loadList])
+  );
+
   useEffect(() => {
-    loadList();
+    const onAppState = (state: AppStateStatus) => {
+      if (state === 'active') {
+        loadList();
+      }
+    };
+    const sub = AppState.addEventListener('change', onAppState);
+    return () => sub.remove();
   }, [loadList]);
 
   const handleBackToPreviousScreen = useCallback(() => {
