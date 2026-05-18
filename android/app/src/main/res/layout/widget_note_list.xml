@@ -20,12 +20,6 @@
         android:ellipsize="end"
         android:text="My List" />
 
-    <!-- Divider matching app border-b border-border under title areas -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/widget_border"
-        android:layout_marginBottom="8dp" />
 
     <FrameLayout
         android:layout_width="match_parent"
