@@ -4,7 +4,10 @@
   <color name="colorPrimary">#023c69</color>
   <color name="colorPrimaryDark">#ffffff</color>
   <!-- Light theme (matches app global.css / theme.ts) -->
-  <color name="widget_surface">#FFFFFF</color>
+  <!-- #33 alpha = ~20% opacity — light milky overlay -->
+  <color name="widget_surface">#33FFFFFF</color>
   <color name="widget_border">#E5E5E5</color>
   <color name="widget_text_primary">#0A0A0A</color>
+  <!-- muted-foreground (0 0% 45.1%) used for checked items -->
+  <color name="widget_text_muted">#737373</color>
 </resources>
