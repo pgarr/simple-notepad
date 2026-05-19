@@ -1,11 +1,5 @@
 # AI Agents Instructions (simple-notepad)
 
-## Mission
-
-This repo is a small Expo + React Native app (using Expo Router and NativeWind/Tailwind) for creating, listing, and editing "notes" and "checklist lists", persisted in a local SQLite database.
-
-When you (or another AI agent) are asked to implement a change, prefer working through the existing route/components structure and the centralized SQLite data layer in `lib/dataStorage.ts`.
-
 ## Quick Safety Checklist (do not break invariants)
 
 - Do not remove/skip the `migrateDbIfNeeded` hook from `SQLiteProvider` in `app/_layout.tsx`.
@@ -25,6 +19,22 @@ Key points for agents:
 - Do **not** run `expo prebuild --clean` — use `expo prebuild` (no `--clean`) to preserve widget files.
 - After any write operation in `lib/dataStorage.ts`, call `syncAndroidNoteListWidgetFromApp()` (already defined there) so the widget refreshes. All existing CRUD helpers already do this.
 
+## Mission
+
+This repo is a small Expo + React Native app (using Expo Router and NativeWind/Tailwind) for creating, listing, and editing "notes" and "checklist lists", persisted in a local SQLite database.
+
+When you (or another AI agent) are asked to implement a change, prefer working through the existing route/components structure and the centralized SQLite data layer in `lib/dataStorage.ts`.
+
+## Before creating a PR
+
+Always bump the version before opening a pull request. Choose the bump type based on the nature of the changes:
+
+- **patch** (`npm run bump:patch`) — bug fixes, small tweaks, copy changes
+- **minor** (`npm run bump:minor`) — new user-visible features, non-breaking additions
+- **major** (`npm run bump:major`) — breaking changes, major UX overhauls
+
+Run the bump command, then include the resulting `app.json` and `package.json` changes in the same commit or PR. Never open a PR without a version bump — the CI check enforces this.
+
 ## When implementing a feature (agent playbook)
 
 1. **Locate the route** to change/add under `app/`.
@@ -40,14 +50,6 @@ Key points for agents:
 6. If adding a new write operation in `lib/dataStorage.ts`, call `syncAndroidNoteListWidgetFromApp()` after the DB write (see existing helpers for the pattern).
 
 ## SQLite Database Model (most important invariants)
-
-### Where the DB is initialized
-
-`app/_layout.tsx` wraps the router with:
-
-- `<SQLiteProvider databaseName="notes.db" onInit={migrateDbIfNeeded}>`
-
-So the migration function in `lib/dataStorage.ts` is responsible for keeping schema compatible across app updates.
 
 ### Schema and versioning
 
@@ -71,29 +73,9 @@ Important rule: updating list items uses `UPDATE content SET note = ? WHERE id =
 
 ## Repo Layout (where things live)
 
-- `app/`: screens/routes (Expo Router)
-  - `app/index.tsx`: notes list screen
-  - `app/add-note.tsx`: create note
-  - `app/edit-note/[id].tsx`: edit note by numeric id
-  - `app/note/[id].tsx`: view note by numeric id
-  - `app/add-list.tsx`: create list
-  - `app/edit-list/[id].tsx`: edit list by numeric id
-  - `app/list/[id].tsx`: view list by numeric id
-- `components/`: reusable UI pieces
-  - `components/NoteForm.tsx`: shared note create/edit form
-  - `components/ListForm.tsx`: shared list create/edit form
-  - `components/AddContentDropdown.tsx`: "add note or list" UI
-  - `components/navigation/HeaderBackButton.tsx`: back arrow button for screen headers
-  - `components/state/`: `ScreenLoadingState` and `ScreenNotFoundState`
-  - `components/ui/`: primitive UI components — `button`, `card`, `icon`, `input`, `textarea`, `text`
-- `lib/`: non-UI logic
-  - `lib/dataStorage.ts`: SQLite schema, migrations, and CRUD helpers
-  - `lib/theme.ts`: navigation theme colors
-  - `lib/utils.ts`: `cn()` utility for className merging
-- `hooks/`: small hooks used by screens
-  - `useParsedNumericRouteParam`: parses numeric `[id]` params safely
-  - `useHardwareBackHandler`: handles Android back navigation
-  - `useKeyboardOffset`: tracks keyboard visibility on Android to compute bottom padding
+Routes under `app/`, reusable UI under `components/`, non-UI logic under `lib/`, custom hooks under `hooks/`.
+
+@README.md
 
 ## Tech Stack (what to assume)
 
@@ -122,8 +104,7 @@ Expo ~54, Expo Router, NativeWind v4, expo-sqlite, TypeScript strict — see @pa
 ## Code Style / Quality Bar
 
 - Use type narrowing (not !) for nullable fields and 'loading' states. Always unwrap numeric route params via useParsedNumericRouteParam — never cast useLocalSearchParams() output directly.
-- Follow Prettier config expectations:
-  - single quotes, `printWidth: 100`, Tailwind plugin support.
+- Run `npx prettier --check .` before committing (single quotes, `printWidth: 100`, Tailwind plugin). CI enforces this.
 - All SQL lives in lib/dataStorage.ts. No exceptions.
 
 ## Running the app (for humans/agents)
