@@ -37,6 +37,11 @@ Every change — no matter how small — must follow this exact sequence:
 
 Direct pushes to `master` are blocked by branch protection. CI enforces the version bump — a PR with the same version as `master` will fail.
 
+**Agent rules:**
+
+- **Never create a branch, commit, or PR unless explicitly asked by the developer.** Make code changes when asked; git operations only on explicit instruction.
+- **Do not push** until the developer has tested the changes locally on a dev device and confirmed they are ready.
+
 Choose the bump type based on the nature of the changes:
 
 - **patch** (`npm run bump:patch`) — bug fixes, small tweaks, copy changes
