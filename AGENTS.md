@@ -25,15 +25,23 @@ This repo is a small Expo + React Native app (using Expo Router and NativeWind/T
 
 When you (or another AI agent) are asked to implement a change, prefer working through the existing route/components structure and the centralized SQLite data layer in `lib/dataStorage.ts`.
 
-## Before creating a PR
+## Git Workflow (every change, no exceptions)
 
-Always bump the version before opening a pull request. Choose the bump type based on the nature of the changes:
+Every change — no matter how small — must follow this exact sequence:
+
+1. **Create a new branch** off `master` (never commit directly to `master`)
+2. **Make your changes** and commit them to the branch
+3. **Bump the version** (`npm run bump:patch/minor/major`) and commit the version files
+4. **Push** the branch to remote
+5. **Open a pull request** targeting `master`
+
+Direct pushes to `master` are blocked by branch protection. CI enforces the version bump — a PR with the same version as `master` will fail.
+
+Choose the bump type based on the nature of the changes:
 
 - **patch** (`npm run bump:patch`) — bug fixes, small tweaks, copy changes
 - **minor** (`npm run bump:minor`) — new user-visible features, non-breaking additions
 - **major** (`npm run bump:major`) — breaking changes, major UX overhauls
-
-Run the bump command, then include the resulting `app.json` and `package.json` changes in the same commit or PR. Never open a PR without a version bump — the CI check enforces this.
 
 ## When implementing a feature (agent playbook)
 
