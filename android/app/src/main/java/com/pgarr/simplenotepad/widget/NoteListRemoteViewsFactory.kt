@@ -11,18 +11,17 @@ import com.pgarr.simplenotepad.R
 
 class NoteListRemoteViewsFactory(
     private val context: Context,
-    @Suppress("UNUSED_PARAMETER") private val listId: Int
+    private val widgetId: Int
 ) : RemoteViewsService.RemoteViewsFactory {
 
     private var items: List<WidgetListItem> = emptyList()
     private var listTitle: String = ""
-    /** Id of the list rows are from — always aligned with [onDataSetChanged] (latest list). */
     private var boundListId: Int = -1
 
     override fun onCreate() {}
 
     override fun onDataSetChanged() {
-        val list = WidgetDbHelper.getLatestList(context)
+        val list = WidgetDbHelper.resolveList(context, widgetId)
         if (list == null) {
             items = emptyList()
             listTitle = ""

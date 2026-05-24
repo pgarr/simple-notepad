@@ -8,17 +8,36 @@
     android:padding="12dp"
     android:background="@drawable/widget_background">
 
-    <TextView
-        android:id="@+id/widget_title"
+    <LinearLayout
+        android:id="@+id/widget_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="@color/widget_text_primary"
-        android:paddingBottom="8dp"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:text="My List" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:id="@+id/widget_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/widget_text_primary"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:text="My List" />
+
+        <ImageView
+            android:id="@+id/widget_dropdown_btn"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/widget_chevron_down"
+            android:scaleType="center"
+            android:paddingStart="8dp"
+            android:contentDescription="Select list" />
+
+    </LinearLayout>
 
 
     <FrameLayout

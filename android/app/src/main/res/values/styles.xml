@@ -11,4 +11,8 @@
     <item name="postSplashScreenTheme">@style/AppTheme</item>
     <item name="android:windowSplashScreenBehavior">icon_preferred</item>
   </style>
+  <style name="Theme.Widget.ListSelect" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+    <item name="android:windowMinWidthMajor">50%</item>
+    <item name="android:windowMinWidthMinor">70%</item>
+  </style>
 </resources>
