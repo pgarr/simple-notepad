@@ -2,7 +2,7 @@
   "expo": {
     "name": "simple-notepad",
     "slug": "simple-notepad",
-    "version": "1.5.0",
+    "version": "1.5.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "simple-notepad",
@@ -24,7 +24,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.pgarr.simplenotepad",
-      "versionCode": 22
+      "versionCode": 23
     },
     "web": {
       "bundler": "metro",
@@ -43,7 +43,7 @@
         "projectId": "9e3820b7-558b-4bd2-a1b2-e49561e741e6"
       }
     },
-    "runtimeVersion": "1.5.0",
+    "runtimeVersion": "1.5.1",
     "updates": {
       "url": "https://u.expo.dev/9e3820b7-558b-4bd2-a1b2-e49561e741e6"
     }
