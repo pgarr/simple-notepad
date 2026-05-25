@@ -24,6 +24,13 @@ class NoteListWidget : AppWidgetProvider() {
             }
     }
 
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        for (widgetId in appWidgetIds) {
+            WidgetPrefs.clearSelectedListId(context, widgetId)
+        }
+    }
+
     companion object {
         fun refreshAllWidgets(context: Context) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
@@ -42,15 +49,15 @@ class NoteListWidget : AppWidgetProvider() {
             appWidgetManager: AppWidgetManager,
             widgetId: Int
         ) {
-            val latestList = WidgetDbHelper.getLatestList(context)
-    
+            val displayList = WidgetDbHelper.resolveList(context, widgetId)
+
             val rv = RemoteViews(context.packageName, R.layout.widget_note_list)
-    
-            rv.setTextViewText(R.id.widget_title, latestList?.title ?: "No lists")
+
+            rv.setTextViewText(R.id.widget_title, displayList?.title ?: "No lists")
 
             val listDeepLink =
-                if (latestList != null) {
-                    Uri.parse("simple-notepad:///list/${latestList.id}")
+                if (displayList != null) {
+                    Uri.parse("simple-notepad:///list/${displayList.id}")
                 } else {
                     Uri.parse("simple-notepad:///")
                 }
@@ -59,7 +66,7 @@ class NoteListWidget : AppWidgetProvider() {
                     setClass(context, MainActivity::class.java)
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 }
-            val openListFlags =
+            val pendingIntentFlags =
                 PendingIntent.FLAG_UPDATE_CURRENT or
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         PendingIntent.FLAG_IMMUTABLE
@@ -71,12 +78,25 @@ class NoteListWidget : AppWidgetProvider() {
                     context,
                     widgetId + 10_000,
                     openListIntent,
-                    openListFlags
+                    pendingIntentFlags
                 )
             rv.setOnClickPendingIntent(R.id.widget_title, openListPendingIntent)
-    
+
+            val selectListIntent = Intent(context, WidgetListSelectActivity::class.java).apply {
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+                data = Uri.parse("widget://select/$widgetId")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            val selectListPendingIntent = PendingIntent.getActivity(
+                context,
+                widgetId + 20_000,
+                selectListIntent,
+                pendingIntentFlags
+            )
+            rv.setOnClickPendingIntent(R.id.widget_dropdown_btn, selectListPendingIntent)
+
             val serviceIntent = Intent(context, NoteListWidgetService::class.java).apply {
-                putExtra("list_id", latestList?.id ?: -1)
+                putExtra("widget_id", widgetId)
                 data = android.net.Uri.parse("widget://list/$widgetId")
             }
             rv.setRemoteAdapter(R.id.widget_list_view, serviceIntent)

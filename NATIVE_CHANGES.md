@@ -19,21 +19,24 @@ Update this file whenever you add or modify native files.
 
 Location: `android/app/src/main/java/com/pgarr/simplenotepad/widget/`
 
-| File                            | Description                                                                                                                                                                                                                                                                                |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `NoteListWidget.kt`             | `AppWidgetProvider` — entry point, called by Android on widget add/update. Reads the latest list from SQLite and binds it to the `ListView` via `RemoteViewsService`.                                                                                                                      |
-| `NoteListWidgetService.kt`      | `RemoteViewsService` — Android requires a bound service to supply list row views to a widget `ListView`. Instantiates `NoteListRemoteViewsFactory`.                                                                                                                                        |
-| `NoteListRemoteViewsFactory.kt` | `RemoteViewsFactory` — builds each list row `RemoteViews`. Sets the checkbox icon (on/off), text, opacity for completed items, and attaches a fill-in `Intent` to each row for tap handling.                                                                                               |
-| `WidgetDbHelper.kt`             | Opens the app's SQLite database directly using Android's `SQLiteDatabase` API (not expo-sqlite). Provides `getLatestList()` and `toggleItem()`. Parses and writes the `note` column JSON in a format exactly matching the JS `parseListItems` / `stringifyListItems` functions in `db.ts`. |
-| `WidgetUpdateReceiver.kt`       | `BroadcastReceiver` — receives checkbox tap broadcasts, calls `WidgetDbHelper.toggleItem()`, then calls `notifyAppWidgetViewDataChanged` to re-render the widget list.                                                                                                                     |
+| File                            | Description                                                                                                                                                                                                                                                                                                           |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NoteListWidget.kt`             | `AppWidgetProvider` — entry point, called by Android on widget add/update. Resolves which list to show (via `WidgetDbHelper.resolveList`), binds it to the `ListView`, and sets up the title click (opens the list in the app) and chevron click (opens `WidgetListSelectActivity`). Cleans up prefs on widget delete. |
+| `NoteListWidgetService.kt`      | `RemoteViewsService` — Android requires a bound service to supply list row views to a widget `ListView`. Instantiates `NoteListRemoteViewsFactory`.                                                                                                                                                                    |
+| `NoteListRemoteViewsFactory.kt` | `RemoteViewsFactory` — builds each list row `RemoteViews`. Sets the checkbox icon (on/off), text, opacity for completed items, and attaches a fill-in `Intent` to each row for tap handling.                                                                                                                          |
+| `WidgetDbHelper.kt`             | Opens the app's SQLite database directly using Android's `SQLiteDatabase` API (not expo-sqlite). Provides `getLatestList()`, `getAllLists()`, `getListById()`, `resolveList()`, and `toggleItem()`. Parses and writes the `note` column JSON matching the JS `parseListItems` / `stringifyListItems` functions.        |
+| `WidgetPrefs.kt`                | SharedPreferences helper. Persists the selected list ID per widget instance using the key `"selected_list_<widgetId>"` in the `"widget_prefs"` file. A value of `-1` means "no explicit selection; use latest".                                                                                                        |
+| `WidgetListSelectActivity.kt`   | Dialog-themed `AppCompatActivity` launched by tapping the chevron icon in the widget header. Queries all lists via `WidgetDbHelper.getAllLists()`, shows an `AlertDialog` list picker, saves the selection to `WidgetPrefs`, then refreshes the widget.                                                                |
+| `WidgetUpdateReceiver.kt`       | `BroadcastReceiver` — receives checkbox tap broadcasts, calls `WidgetDbHelper.toggleItem()`, then calls `notifyAppWidgetViewDataChanged` to re-render the widget list.                                                                                                                                                 |
 
 #### Resource files
 
 Location: `android/app/src/main/res/`
 
-| File                            | Description                                                                                                                                                                                                                                                 |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `layout/widget_note_list.xml`   | Root widget layout. Contains a `TextView` for the list title and a `ListView` for the items.                                                                                                                                                                |
+| File                            | Description                                                                                                                                                                                                                                                                         |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `layout/widget_note_list.xml`   | Root widget layout. Contains a horizontal header row (list title `TextView` + chevron `ImageView` for the list picker) and a `ListView` for the items.                                                                                                                              |
+| `drawable/widget_chevron_down.xml` | Lucide-style chevron-down vector icon (16×16dp) used in the widget header to indicate the list selector.                                                                                                                                                                         |
 | `layout/widget_list_item.xml`   | Single row layout. Contains an `ImageView` acting as a checkbox (swapped between `checkbox_on_background` / `checkbox_off_background` drawables) and a `TextView` for item text. Note: real `CheckBox` views cannot be used interactively in `RemoteViews`. |
 | `xml/note_list_widget_info.xml` | `AppWidgetProviderInfo` — declares widget minimum size (250×180dp), resize behaviour, update interval, and initial layout.                                                                                                                                  |
 
@@ -41,7 +44,7 @@ Location: `android/app/src/main/res/`
 
 File: `android/app/src/main/AndroidManifest.xml`
 
-Three entries added inside `<application>`:
+Four entries added inside `<application>`:
 
 ```xml
 <!-- Widget provider -->
@@ -70,6 +73,13 @@ Three entries added inside `<application>`:
     android:name=".widget.NoteListWidgetService"
     android:permission="android.permission.BIND_REMOTEVIEWS"
     android:exported="false" />
+
+<!-- Dialog activity for picking which list the widget displays -->
+<activity
+    android:name=".widget.WidgetListSelectActivity"
+    android:theme="@style/Theme.Widget.ListSelect"
+    android:exported="false"
+    android:excludeFromRecents="true" />
 ```
 
 ---
@@ -83,7 +93,7 @@ The widget reads from the same database and table as the main app.
 | Database file    | `notes.db` — **must match** the string passed to `openDatabaseAsync()` in JS. Defined in `WidgetDbHelper.kt` as `DB_NAME`. |
 | Table            | `content`                                                                                                                  |
 | Relevant columns | `id`, `title`, `note` (JSON string), `type` (0 = note, 1 = list)                                                           |
-| Widget reads     | `SELECT * FROM content WHERE type = 1 ORDER BY id DESC LIMIT 1`                                                            |
+| Widget reads     | `SELECT * FROM content WHERE type = 1 ORDER BY id DESC LIMIT 1` (latest/fallback); `SELECT ... WHERE id = ?` (selected)   |
 | Widget writes    | `UPDATE content SET note = ? WHERE id = ? AND type = 1`                                                                    |
 
 The JSON format of the `note` column for lists is an array of `{ "checked": boolean, "text": string }` objects, matching `parseListItems` / `stringifyListItems` in `db.ts`.
@@ -94,7 +104,7 @@ The JSON format of the `note` column for lists is an array of `{ "checked": bool
 
 - **Stale app state:** If the user taps a checkbox in the widget while the app is open on the same list, the app's in-memory state will be stale until it re-fetches. Add a re-fetch in your list screen's `useEffect` on `AppState` change event to handle this.
 - **Concurrent writes:** The widget and the app both write to the same SQLite file. SQLite WAL mode (enabled in migrations) handles concurrent reads safely, but avoid triggering widget updates and app writes simultaneously. In practice this is unlikely for a notepad app.
-- **Which list is shown:** Currently the widget always shows the list with the highest `id`. There is no per-widget configuration (pinning a specific list). This could be added via `AppWidgetConfigureActivity` in a future iteration.
+- **Per-widget list selection:** The chevron icon in the widget header opens a list picker. The selection is stored in `SharedPreferences` (`"widget_prefs"` file, key `"selected_list_<widgetId>"`). If the selected list is later deleted from the app, the widget automatically falls back to the most recently created list and clears the stale preference.
 - **Update interval:** Set to 30 minutes (`updatePeriodMillis="1800000"`) in `note_list_widget_info.xml`. Android batches and throttles this — do not rely on it for real-time updates. The widget updates immediately on checkbox tap via the broadcast receiver.
 
 ---

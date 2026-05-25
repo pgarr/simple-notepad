@@ -42,5 +42,10 @@
       </intent-filter>
     </receiver>
     <service android:name=".widget.NoteListWidgetService" android:permission="android.permission.BIND_REMOTEVIEWS" android:exported="false"/>
+    <activity
+      android:name=".widget.WidgetListSelectActivity"
+      android:theme="@style/Theme.Widget.ListSelect"
+      android:exported="false"
+      android:excludeFromRecents="true" />
   </application>
 </manifest>
