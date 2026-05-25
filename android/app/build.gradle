@@ -92,8 +92,8 @@ android {
         applicationId 'com.pgarr.simplenotepad'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 23
-        versionName "1.6.0"
+        versionCode 24
+        versionName "1.6.1"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }
@@ -179,4 +179,8 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    testImplementation 'junit:junit:4.13.2'
+    // Android stubs org.json with no-op implementations; this provides the real one for JVM tests.
+    testImplementation 'org.json:json:20231013'
 }
