@@ -28,7 +28,7 @@ class NoteListRemoteViewsFactory(
             boundListId = -1
             return
         }
-        items = list.items
+        items = list.items.filter { !it.checked }
         listTitle = list.title
         boundListId = list.id
     }
@@ -62,7 +62,7 @@ class NoteListRemoteViewsFactory(
 
         // Fill-in intent carries position and listId to the broadcast receiver
         val fillIntent = Intent().apply {
-            putExtra("item_index", position)
+            putExtra("item_index", item.originalIndex)
             putExtra("list_id", boundListId)
         }
         rv.setOnClickFillInIntent(R.id.item_checkbox, fillIntent)
