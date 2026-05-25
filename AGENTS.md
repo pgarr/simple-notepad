@@ -40,7 +40,8 @@ Direct pushes to `master` are blocked by branch protection. CI enforces the vers
 
 **Agent rules:**
 
-- **Never create a branch, commit, or PR unless explicitly asked by the developer.** Make code changes when asked; git operations only on explicit instruction.
+- **"Implement X" means make the code changes only.** Stop there and wait. Do not branch, commit, bump the version, push, or open a PR unless the developer explicitly says to (e.g. "commit this", "open a PR", "do the full workflow").
+- **Before opening a PR, ask** whether the new work should go into an existing open branch/PR or a new one. Never assume a new branch.
 - **Do not push** until the developer has tested the changes locally on a dev device and confirmed they are ready.
 
 Choose the bump type based on the nature of the changes:
