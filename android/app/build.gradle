@@ -179,4 +179,8 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    testImplementation 'junit:junit:4.13.2'
+    // Android stubs org.json with no-op implementations; this provides the real one for JVM tests.
+    testImplementation 'org.json:json:20231013'
 }
