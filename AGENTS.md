@@ -29,6 +29,7 @@ When you (or another AI agent) are asked to implement a change, prefer working t
 
 Every change — no matter how small — must follow this exact sequence:
 
+0. **Pull the latest `master`** (`git checkout master && git pull`) before creating any branch — ensures the version bump targets the correct base and avoids version conflicts in CI.
 1. **Create a new branch** off `master` (never commit directly to `master`)
 2. **Make your changes** and commit them to the branch
 3. **Bump the version** (`npm run bump:patch/minor/major`) and commit the version files
