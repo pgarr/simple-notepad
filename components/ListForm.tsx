@@ -1,8 +1,10 @@
 import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { useKeyboardOffset } from '@/hooks/useKeyboardOffset';
 import { ListItem } from '@/lib/dataStorage';
+import { Trash2Icon } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 
@@ -33,6 +35,10 @@ export function ListForm({
     setItems((current) =>
       current.map((item, currentIndex) => (currentIndex === index ? { ...item, text } : item))
     );
+  }, []);
+
+  const handleDeleteRow = useCallback((index: number) => {
+    setItems((current) => current.filter((_, i) => i !== index));
   }, []);
 
   const handleSave = useCallback(async () => {
@@ -70,14 +76,23 @@ export function ListForm({
           showsVerticalScrollIndicator={false}>
           <View className="flex-1 gap-3 px-4">
             {items.map((item, index) => (
-              <Input
-                key={`row-${index}`}
-                className="w-full"
-                placeholder={`Item ${index + 1}`}
-                value={item.text}
-                onChangeText={(text) => handleUpdateRow(index, text)}
-                editable={!saving}
-              />
+              <View key={`row-${index}`} className="flex-row items-center gap-2">
+                <Input
+                  className="flex-1"
+                  placeholder={`Item ${index + 1}`}
+                  value={item.text}
+                  onChangeText={(text) => handleUpdateRow(index, text)}
+                  editable={!saving}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onPress={() => handleDeleteRow(index)}
+                  disabled={saving}
+                  accessibilityLabel={`Delete item ${index + 1}`}>
+                  <Icon as={Trash2Icon} className="size-5 text-destructive" />
+                </Button>
+              </View>
             ))}
             <Button variant="outline" onPress={handleAddRow} disabled={saving}>
               <Text>Add</Text>

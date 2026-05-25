@@ -6,7 +6,7 @@ import org.json.JSONArray
 import java.io.File
 
 // Mirrors your expo-sqlite DB schema exactly
-data class WidgetListItem(val text: String, val checked: Boolean)
+data class WidgetListItem(val text: String, val checked: Boolean, val originalIndex: Int = 0)
 data class WidgetList(val id: Int, val title: String, val items: List<WidgetListItem>)
 
 object WidgetDbHelper {
@@ -96,7 +96,7 @@ object WidgetDbHelper {
                 val obj = arr.optJSONObject(i) ?: return@mapNotNull null
                 val text = obj.optString("text", "")
                 val checked = obj.optBoolean("checked", false)
-                WidgetListItem(text = text, checked = checked)
+                WidgetListItem(text = text, checked = checked, originalIndex = i)
             }
         } catch (_: Exception) {
             emptyList()
